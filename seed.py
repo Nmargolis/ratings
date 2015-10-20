@@ -43,18 +43,24 @@ def load_movies():
 
     for row in open("seed_data/u.item"):
         row = row.rstrip()
-        movie_id = row[0]
-        full_title = row[1].split('(')
-        title = full_title[0].rstrip()
-        released_at = datetime.datetime.strptime(row[2], "%d-%b-%Y")
-        imdb_url = row[4]
+        row = row.split('|')
+        if row != []:
+            movie_id = row[0]
+            full_title = row[1].split('(')
+            title = full_title[0].rstrip()
+          
+            if row[2] != '':
+                released_at = datetime.datetime.strptime(row[2], "%d-%b-%Y")
+            else:
+                released_at = None
+            imdb_url = row[4]
+          
+            movie = Movie(movie_id=movie_id, 
+                            title=title,
+                            released_at=released_at,
+                            imdb_url=imdb_url)
 
-        movie = Movie(movie_id=movie_id, 
-                        title=title,
-                        released_at=released_at,
-                        imdb_url=imdb_url)
-
-        db.session.add(movie)
+            db.session.add(movie)
 
     db.session.commit()
 
