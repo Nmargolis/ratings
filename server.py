@@ -32,6 +32,14 @@ def user_list():
     users = User.query.all()
     return render_template("user_list.html", users=users)
 
+@app.route('/movies')
+def movie_list():
+    """Show list of movies."""
+
+    movies = Movie.query.order_by(Movie.title).all()
+    return render_template("movie_list.html", movies=movies)
+
+
 @app.route('/signup')
 def show_signup():
     """Show sign-up form."""
@@ -80,29 +88,43 @@ def process_login():
 
     email = request.form.get('email')
     password = request.form.get('password')
-
    
     account = User.query.filter_by(email=email).first()
+    user_id = account.user_id
 
     if account.password == password:
         flash('You were successfully logged in')
         session['user'] = email
-        return render_template('homepage.html')
+        return redirect('/users/'+str(user_id))
     #put in else
 
 @app.route('/logout')
 def process_logout():
     """Remove user from session"""
     print session.get('user')
-    removed =  session.pop('user')
+    removed =  session.pop('user', None)
     print removed
     flash('You have successfully logged out.')
 
     return render_template('homepage.html')
 
-# @app.route('users/<int:user_id>')
-# def user_info():
-#     pass
+
+@app.route('/users/<int:user_id>')
+def user_info(user_id):
+    """Query user information, passing it to user profile page"""
+
+    user = User.query.get(user_id)
+
+    return render_template('user.html', user=user)
+
+@app.route('/movies/<int:movie_id>')
+def movie_info(movie_id):
+    """Query movie information, passing it to the movie profile page."""
+
+    movie = Movie.query.get(movie_id)
+
+    return render_template('movie_info.html', movie=movie)
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
