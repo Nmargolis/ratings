@@ -2,6 +2,8 @@
 
 from flask_sqlalchemy import SQLAlchemy
 
+from correlation import pearson
+
 # This is the connection to the SQLite database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
 # object, where we do most of our interactions (like committing, etc.)
@@ -23,10 +25,48 @@ class User(db.Model):
     age = db.Column(db.Integer, nullable=True)
     zipcode = db.Column(db.String(15), nullable=True)
 
+
     def __repr__(self):
         """Provide helpful representation when printed."""
 
         return "<User user_id=%s email=%s age=%s zipcode=%s>" % (self.user_id, self.email, self.age, self.zipcode)
+
+
+    def similarity(self, other):
+
+        # create empty list for user 1's ratings
+        u_ratings = {}
+
+        # for each rating in user 1's ratings
+        for r in self.ratings:
+            # add to dictionary u_ratings key value pair of movie_id and associated rating object
+            u_ratings[r.movie_id] = r
+
+        #Why do we do the above inside this function, as opposed to adding u_ratings as an attribute of User class?
+
+        # # Peel off first user from other_users
+        # o = other_users[0]
+
+        # create empty list of paired ratings
+        paired_ratings = []
+
+        # for each rating in the other user's ratings
+        for o_rating in other.ratings:
+            #look in user 1's dictionary to see if other user's rating's movie_id exists
+            u_rating = u_ratings.get(o_rating.movie_id)
+            #if user 1 has rated the movie (meaning user u_rating exists)
+            if u_rating:
+                #create a pair of scores from user 1 and other user
+                pair = (u_rating.score, o_rating.score)
+                # append pair from ^^ to paired_ratings list
+                paired_ratings.append(pair)
+
+        if paired_ratings:
+            return pearson(paired_ratings)
+
+        else:
+            return 0.0
+
 
 class Movie(db.Model):
     """Movies to rate."""
@@ -71,7 +111,9 @@ class Rating(db.Model):
                                                                             self.user_id, 
                                                                             self.score)
 
-# Put your Movie and Rating model classes here.
+
+
+
 
 
 ##############################################################################
