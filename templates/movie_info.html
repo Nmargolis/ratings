@@ -15,6 +15,22 @@
         {% endfor %}
     </ul>
 
+    {% if session %}
+    <h3>Add a Review for {{ movie.title }}</h3>
+    <form action="/process_rating" method="POST">
+      <input type="radio" name="rating" value="1">1<br>
+      <input type="radio" name="rating" value="2">2<br>
+      <input type="radio" name="rating" value="3">3<br>
+      <input type="radio" name="rating" value="4">4<br>
+      <input type="radio" name="rating" value="5">5<br>
+      <input type="hidden" name="movie-id" value="{{ movie.movie_id }}">
+      <input type="hidden" name="user-id" value="{{ session['user'] }}">
+      <input type="submit" value="Submit Rating">
+    </form>
+    {% else %}
+    To rate this movie, please <a href="/login">login</a>.
+    {% endif %}
+
 {% endblock %}
 
 <!-- Make this a table -->

@@ -32,6 +32,7 @@ def user_list():
     users = User.query.all()
     return render_template("user_list.html", users=users)
 
+
 @app.route('/movies')
 def movie_list():
     """Show list of movies."""
@@ -81,6 +82,7 @@ def show_login():
         flash('You are already logged in')
     return render_template('login.html')
 
+
 @app.route('/process-login', methods=["POST"])
 def process_login():
     """Process login form. Check if user and email match"""
@@ -94,9 +96,12 @@ def process_login():
 
     if account.password == password:
         flash('You were successfully logged in')
-        session['user'] = email
+        session['user'] = user_id
         return redirect('/users/'+str(user_id))
-    #put in else
+    else:
+        flash('Username and password do not match. Please try again.')
+        return redirect('/login')
+
 
 @app.route('/logout')
 def process_logout():
@@ -117,6 +122,7 @@ def user_info(user_id):
 
     return render_template('user.html', user=user)
 
+
 @app.route('/movies/<int:movie_id>')
 def movie_info(movie_id):
     """Query movie information, passing it to the movie profile page."""
@@ -124,6 +130,30 @@ def movie_info(movie_id):
     movie = Movie.query.get(movie_id)
 
     return render_template('movie_info.html', movie=movie)
+
+
+@app.route('/process_rating', methods=["POST"])
+def process_rating():
+    """Process user rating for movie."""
+
+    movie_id = request.form.get("movie-id")
+    user_id = request.form.get("user-id")
+    rating = request.form.get("rating")
+
+    existing_rating = Rating.query.filter(Rating.movie_id == movie_id, Rating.user_id == user_id).first()
+
+    if existing_rating is None:
+        new_rating = Rating(movie_id=movie_id, user_id=user_id, score=rating)
+        db.session.add(new_rating)
+        db.session.commit()
+        flash("Rating was successful.")
+    else:
+        existing_rating.score = rating
+        db.session.commit()
+        flash('Rating was updated.')
+
+    return redirect ('/movies/'+str(movie_id))
+
 
 
 if __name__ == "__main__":
