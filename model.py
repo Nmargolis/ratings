@@ -68,6 +68,35 @@ class User(db.Model):
             return 0.0
 
 
+    def predict_rating(self, movie):
+        """Predict user's rating of a movie."""
+        
+        # Get list of ratings for the movie
+        other_ratings = movie.ratings
+
+        
+        similarities = []
+
+        # for each rating in other ratings, find the associated user's similarity to self 
+        # and store pair of similarity and rating in similarities list
+        for r in other_ratings:
+            similarity = self.similarity(r.user)
+            similarities.append((similarity, r))
+
+        # sort similarities descending
+        similarities.sort(reverse=True)
+
+        print similarities
+        
+        # Pick out top one
+        sim, rating = similarities[0]
+
+        # Return predicted score
+        return rating.score * sim
+
+
+
+
 class Movie(db.Model):
     """Movies to rate."""
 
